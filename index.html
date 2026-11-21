@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Software de Cálculo de Notas Definitivas">
+  <title>Notas Definitivas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Encabezado global: identifica la app y muestra contexto de sesión -->
+  <header class="site-header">
+    <div class="container header-content">
+      <div>
+        <p class="eyebrow">Software académico</p>
+        <h1 class="site-title">Cálculo de Notas Definitivas</h1>
+      </div>
+
+      <!-- Se mostrará solo cuando exista sesión activa en memoria (Fase 3) -->
+      <div id="sessionInfo" class="session-info is-hidden" aria-live="polite">
+        <p class="session-label">Estudiante activo</p>
+        <p id="sessionDocument" class="session-document"></p>
+        <button id="logoutBtn" type="button" class="btn btn-secondary">
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <!--
+      Región de mensajes globales.
+      JS cambiará texto y clases de estado (state-error/state-success/state-info).
+      aria-live permite anunciar cambios a tecnologías asistivas.
+    -->
+    <section aria-labelledby="messages-title" class="panel">
+      <h2 id="messages-title" class="visually-hidden">Mensajes del sistema</h2>
+      <p id="appMessage" class="message state-info is-hidden" role="status" aria-live="polite"></p>
+    </section>
+
+    <!-- Fase 3: acceso por documento. Visible por defecto. -->
+    <section id="loginSection" class="panel" aria-labelledby="login-title">
+      <h2 id="login-title">Ingreso</h2>
+      <p class="panel-description">
+        Ingresa tu número de documento. Si no estás registrado, el sistema te registrará automáticamente.
+      </p>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="documentInput">Número de documento</label>
+          <input
+            id="documentInput"
+            name="document"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            required
+            aria-describedby="documentHelp documentError"
+          >
+          <p id="documentHelp" class="field-help">Solo se permite el número de documento de identidad.</p>
+          <p id="documentError" class="field-feedback is-hidden" aria-live="polite"></p>
+        </div>
+
+        <div class="actions">
+          <button id="loginBtn" type="submit" class="btn btn-primary">Ingresar</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Fase 4-5: área de cálculo. Oculta hasta que haya sesión activa. -->
+    <section id="calculatorSection" class="panel is-hidden" aria-labelledby="calculator-title">
+      <h2 id="calculator-title">Calcular nota definitiva</h2>
+      <p class="panel-description">
+        Registra las evaluaciones, valida rangos y porcentajes, y calcula la nota definitiva.
+      </p>
+
+      <form id="gradesForm" novalidate>
+        <div class="field">
+          <label for="gradeCountInput">Cantidad de evaluaciones</label>
+          <input
+            id="gradeCountInput"
+            name="gradeCount"
+            type="number"
+            min="1"
+            step="1"
+            inputmode="numeric"
+            aria-describedby="gradeCountHelp gradeCountError"
+          >
+          <p id="gradeCountHelp" class="field-help">Indica cuántas notas deseas registrar.</p>
+          <p id="gradeCountError" class="field-feedback is-hidden" aria-live="polite"></p>
+        </div>
+
+        <div class="actions">
+          <button id="generateGradesBtn" type="button" class="btn btn-secondary">
+            Generar campos
+          </button>
+        </div>
+
+        <!-- Contenedor dinámico: Fase 4 inyectará aquí las filas de notas/porcentajes -->
+        <div id="gradesContainer" class="grades-container" aria-live="polite"></div>
+
+        <div class="actions">
+          <button id="calculateBtn" type="submit" class="btn btn-primary">
+            Calcular definitiva
+          </button>
+        </div>
+      </form>
+
+      <!-- Resultado del cálculo: Fase 5 actualizará contenido y estado aprobado/reprobado -->
+      <output id="resultCard" class="result-card is-hidden" aria-live="polite">
+        <h3 class="result-title">Resultado</h3>
+        <p class="result-value">Definitiva: <span id="finalGradeValue">--</span></p>
+        <p id="finalGradeStatus" class="result-status">Estado: --</p>
+      </output>
+    </section>
+
+    <!-- Fase 5: historial del estudiante autenticado. -->
+    <section id="historySection" class="panel is-hidden" aria-labelledby="history-title">
+      <h2 id="history-title">Historial de cálculos</h2>
+      <p class="panel-description">
+        Aquí se mostrarán los cálculos guardados en IndexedDB para el estudiante activo.
+      </p>
+
+      <div id="historyEmptyState" class="empty-state">
+        <p>No hay cálculos registrados todavía.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="history-table">
+          <caption class="visually-hidden">Historial de cálculos del estudiante</caption>
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Definitiva</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Detalle</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody">
+            <!-- Fase 5 renderizará filas desde IndexedDB -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>Proyecto académico - Notas Definitivas. Persistencia local con IndexedDB.</small>
+    </div>
+  </footer>
+
+  <!-- Scripts: orden importa por dependencias globales en Vanilla JS -->
+  <script src="db.js"></script>
+  <script src="auth.js"></script>
+  <script src="grades.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
